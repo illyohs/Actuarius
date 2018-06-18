@@ -61,6 +61,7 @@ repositories {
 }
 
 dependencies {
-    compile "com.discord4j.discord4j:discord4j-core:v3-SNAPSHOT"
-    compile group: 'org.eclipse.mylyn.github', name: 'org.eclipse.egit.github.core', version: '2.1.5'
+    implementation 'com.sparkjava:spark-core:2.7.2'
+    implementation 'org.kohsuke:github-api:1.93'
+    implementation 'com.discord4j.discord4j:discord4j-core:v3-SNAPSHOT'
 }
