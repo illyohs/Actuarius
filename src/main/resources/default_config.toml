@@ -1,0 +1,9 @@
+[discord]
+
+token = "YOUR_TOKEN_HERE"
+
+app_id = 00000
+# TODO this needs to be not statically defined (gotten via API)
+installation_id = 0000000
+
+private_key = '.ssh/actuarius-key.pem'

@@ -5,6 +5,7 @@
 /command_data/
 /counts/
 /logs/
+actuarius.toml
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
