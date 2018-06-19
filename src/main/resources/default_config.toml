@@ -2,8 +2,14 @@
 
 token = "YOUR_TOKEN_HERE"
 
+[github]
+
 app_id = 00000
-# TODO this needs to be not statically defined (gotten via API)
-installation_id = 0000000
 
 private_key = '.ssh/actuarius-key.pem'
+
+# The organization or repository this app is installed to
+# This allows commands to be used without specifying the owner/repo
+default_installation = 'MinecraftForge'
+
+force_default = false

@@ -14,6 +14,7 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.util.Snowflake;
 import net.minecraftforge.actuarius.commands.Command;
 import net.minecraftforge.actuarius.commands.CommandException;
+import net.minecraftforge.actuarius.commands.CommandLabel;
 import net.minecraftforge.actuarius.commands.CommandRepoInfo;
 import net.minecraftforge.actuarius.commands.CommandTree;
 import net.minecraftforge.actuarius.util.ArgUtil;
@@ -58,7 +59,8 @@ public class Main extends CommandTree {
                 
                 return c.createMessage(spec -> spec.setContent(reply));
             })
-            .withNode("info", new CommandRepoInfo());
+            .withNode("info", new CommandRepoInfo())
+            .withNode("label", new CommandLabel());
         
         client.getEventDispatcher().on(MessageCreateEvent.class)
                 
@@ -75,7 +77,7 @@ public class Main extends CommandTree {
             .flatMap(t -> t.getT2().flatMap(args -> t.getT1().getMessage().getChannel().flatMap(c -> {
                 try {
                     return rootCommand.invoke(c, args);
-                } catch (CommandException e1) {
+                } catch (Exception e1) {
                     // Generic error handling, can be improved
                     return c.createMessage(spec -> spec.setContent(e1.getMessage()));
                 }

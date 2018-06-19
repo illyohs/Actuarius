@@ -4,15 +4,12 @@ import java.io.IOException;
 
 import org.kohsuke.github.GHPerson;
 import org.kohsuke.github.GHRepository;
-import org.kohsuke.github.GHUser;
 
 import discord4j.core.object.entity.MessageChannel;
 import net.minecraftforge.actuarius.util.GithubUtil;
 import reactor.core.publisher.Mono;
 
 public class CommandRepoInfo implements Command {
-    
-
 
     @Override
     public Mono<?> invoke(MessageChannel channel, String... args) throws CommandException {
@@ -30,9 +27,9 @@ public class CommandRepoInfo implements Command {
             
             GHPerson org;
             try {
-                org = GithubUtil.getClient().getOrganization(owner);
+                org = GithubUtil.getUnauthorizedClient().getOrganization(owner);
             } catch (IOException e) {
-                org = GithubUtil.getClient().getUser(owner);
+                org = GithubUtil.getUnauthorizedClient().getUser(owner);
             }
             
             if (org == null) {
