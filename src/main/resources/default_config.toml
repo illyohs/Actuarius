@@ -13,3 +13,15 @@ private_key = '.ssh/actuarius-key.pem'
 default_installation = 'MinecraftForge'
 
 force_default = false
+
+[permissions]
+
+# tterrag1098
+[[grants]]
+id = 140245257416736769
+repos = [ "MinecraftForge/MinecraftForge" ]
+
+# LexManos
+[[grants]]
+id = 134030797756694528
+repos = [] # Empty is everything

@@ -5,17 +5,18 @@ import java.util.Optional;
 
 import org.kohsuke.github.GHRepository;
 
-import discord4j.core.object.entity.MessageChannel;
-import net.minecraftforge.actuarius.util.ArgUtil;
 import net.minecraftforge.actuarius.util.GHInstallation;
 import net.minecraftforge.actuarius.util.GHInstallation.NoSuchInstallationException;
 import net.minecraftforge.actuarius.util.GithubUtil;
+import net.minecraftforge.actuarius.util.PermissionUtil;
 import reactor.core.publisher.Mono;
 
 public class CommandLabel implements Command {
 
     @Override
-    public Mono<?> invoke(MessageChannel channel, String... args) throws CommandException {
+    public Mono<?> invoke(Context ctx) throws CommandException {
+        
+        String[] args = ctx.getArgs();
         
         GHInstallation installation;
         try {
@@ -27,7 +28,7 @@ public class CommandLabel implements Command {
                 try {
                     installation = GHInstallation.repo(args[0], args[1]);
                 } catch (NoSuchInstallationException e2) {
-                    throw new CommandException("No such repository.", e);
+                    throw new CommandException("No such repository, or no installation on that repository.", e);
                 } catch (ArrayIndexOutOfBoundsException e2) {
                     throw new CommandException("Not enough arguments");
                 }
@@ -42,11 +43,15 @@ public class CommandLabel implements Command {
             repoName = defaultInstallation.get();
             if (repoName.indexOf('/') < 0) {
                 repoName += args[0];
-                args = ArgUtil.withoutFirst(args);
+                ctx = ctx.stripArgs(1);
             }
         } else {
             repoName = args[0] + "/" + args[1];
-            args = ArgUtil.withoutFirst(ArgUtil.withoutFirst(args));
+            ctx = ctx.stripArgs(2);
+        }
+        
+        if (!PermissionUtil.canAccess(ctx.getAuthor(), repoName)) {
+            throw new CommandException("No permission to access that repository.");
         }
         
         try {
@@ -56,7 +61,7 @@ public class CommandLabel implements Command {
             throw new CommandException(e);
         }
         
-        return channel.createMessage(spec -> spec.setContent("Labels updated"));
+        return ctx.getChannel().flatMap(c -> c.createMessage(spec -> spec.setContent("Labels updated")));
     }
 
 }

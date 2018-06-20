@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.kohsuke.github.GHPerson;
 import org.kohsuke.github.GHRepository;
 
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.MessageChannel;
 import net.minecraftforge.actuarius.util.GithubUtil;
 import reactor.core.publisher.Mono;
@@ -12,7 +13,8 @@ import reactor.core.publisher.Mono;
 public class CommandRepoInfo implements Command {
 
     @Override
-    public Mono<?> invoke(MessageChannel channel, String... args) throws CommandException {
+    public Mono<?> invoke(Context ctx) throws CommandException {
+        String[] args = ctx.getArgs();
         String owner = "MinecraftForge", repo;
         if (args.length >= 2) {
             owner = args[0];
@@ -40,7 +42,7 @@ public class CommandRepoInfo implements Command {
                 throw new CommandException("No such repository.");
             }
             
-            return channel.createMessage(spec -> spec.setEmbed(embed -> {
+            return ctx.getChannel().flatMap(c -> c.createMessage(spec -> spec.setEmbed(embed -> {
                 embed.setTitle(repository.getOwnerName() + "/" + repository.getName());
                 String desc = repository.getDescription();
                 if (desc != null) {
@@ -48,7 +50,7 @@ public class CommandRepoInfo implements Command {
                 }
                 embed.addField("Open Issues/PRs", String.valueOf(repository.getOpenIssueCount()), true);
                 embed.addField("Stars", String.valueOf(repository.getStargazersCount()), true);
-            }));
+            })));
         } catch (IOException e) {
             e.printStackTrace();
             throw new CommandException("Error getting repository info.", e);

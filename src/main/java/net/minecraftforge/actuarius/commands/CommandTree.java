@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import discord4j.core.object.entity.MessageChannel;
-import net.minecraftforge.actuarius.util.ArgUtil;
 import reactor.core.publisher.Mono;
 
 public class CommandTree implements Command {
@@ -24,16 +22,15 @@ public class CommandTree implements Command {
     }
     
     @Override
-    public Mono<?> invoke(MessageChannel channel, String... args) throws CommandException {
-        if (args.length == 0) {
+    public Mono<?> invoke(Context ctx) throws CommandException {
+        if (ctx.getArgs().length == 0) {
             throw new CommandException("Not enough arguments.");
         }
-        String[] subArgs = ArgUtil.withoutFirst(args);
-        Command subCommand = getSubcommand(args[0]);
+        Command subCommand = getSubcommand(ctx.getArgs()[0]);
         if (subCommand == null) {
-            throw new CommandException("No known sub-command: " + args[0]);
+            throw new CommandException("No known sub-command: " + ctx.getArgs()[0]);
         }
-        return subCommand.invoke(channel, subArgs);
+        return subCommand.invoke(ctx.stripArgs(1));
     }
     
     public Command getSubcommand(String name) {

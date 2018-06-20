@@ -17,10 +17,9 @@ import net.minecraftforge.actuarius.commands.CommandException;
 import net.minecraftforge.actuarius.commands.CommandLabel;
 import net.minecraftforge.actuarius.commands.CommandRepoInfo;
 import net.minecraftforge.actuarius.commands.CommandTree;
-import net.minecraftforge.actuarius.util.ArgUtil;
+import net.minecraftforge.actuarius.commands.Context;
 import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuples;
 
 public class Main extends CommandTree {
     
@@ -43,21 +42,21 @@ public class Main extends CommandTree {
         DiscordClient client = new ClientBuilder(token).build();
         
         CommandTree rootCommand = new Main();
-        
         rootCommand
-            .withNode("help", (c, args) -> {
+            .withNode("help", (ctx) -> {
                 String reply;
-                if (args.length == 0) {
+                if (ctx.getArgs().length == 0) {    
                     reply = "Available commands: " + rootCommand.getSubCommands();
                 } else {
-                    Command cmd = rootCommand.getSubcommand(args[0]);
+                    String cmdName = ctx.getArgs()[0];
+                    Command cmd = rootCommand.getSubcommand(cmdName);
                     if (cmd == null) {
                         throw new CommandException("No such command.");
                     }
-                    reply = "**" + args[0] + " -- " + cmd.description() + "**\nUsage: " + args[0] + " " + cmd.usage();
+                    reply = "**" + cmdName + " -- " + cmd.description() + "**\nUsage: " + cmdName + " " + cmd.usage();
                 }
                 
-                return c.createMessage(spec -> spec.setContent(reply));
+                return ctx.getChannel().flatMap(c -> c.createMessage(spec -> spec.setContent(reply)));
             })
             .withNode("info", new CommandRepoInfo())
             .withNode("label", new CommandLabel());
@@ -69,19 +68,17 @@ public class Main extends CommandTree {
             
             // Filter for messages where the mention is the start of the content
             .filterWhen(e -> Mono.justOrEmpty(client.getSelfId()).flatMap(id -> isMentionFirst(id, e.getMessage())))
-            
-            // Create a tuple of <MessageChannel, String[]>
-            .map(e -> Tuples.of(e, Mono.justOrEmpty(e.getMessage().getContent()).map(Main::getArguments)))
-            
-            // Unwrap the arguments and pass them to the command
-            .flatMap(t -> t.getT2().flatMap(args -> t.getT1().getMessage().getChannel().flatMap(c -> {
+            .filter(e -> e.getMessage().getContent().isPresent())
+            .filter(e -> e.getGuildId().isPresent())
+            .map(Context::new)
+            .flatMap(ctx -> {
                 try {
-                    return rootCommand.invoke(c, args);
+                    return rootCommand.invoke(ctx);
                 } catch (Exception e1) {
                     // Generic error handling, can be improved
-                    return c.createMessage(spec -> spec.setContent(e1.getMessage()));
+                    return ctx.getChannel().map(c -> c.createMessage(spec -> spec.setContent(e1.getMessage())));
                 }
-            })))
+            })
             .subscribe();
 
         // block() is required to prevent the VM exiting prematurely
@@ -93,10 +90,5 @@ public class Main extends CommandTree {
                 .filterWhen(m -> m.getUserMentions()
                                     .map(u -> u.getId().equals(id)))
                 .map(m -> m.getContent().map(s -> s.matches("^<!?@" + id.asLong() + ">.*$")).orElse(false));
-    }
-    
-    private static String[] getArguments(String message) {
-        String[] in = message.split("\\s+");
-        return ArgUtil.withoutFirst(in);
     }
 }
