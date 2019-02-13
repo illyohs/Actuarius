@@ -1,14 +1,11 @@
-package net.minecraftforge.actuarius.commands;
+package net.minecraftforge.actuarius.bot.discord.commands;
 
-import java.io.IOException;
-
+import net.minecraftforge.actuarius.util.GithubUtil;
 import org.kohsuke.github.GHPerson;
 import org.kohsuke.github.GHRepository;
-
-import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.MessageChannel;
-import net.minecraftforge.actuarius.util.GithubUtil;
 import reactor.core.publisher.Mono;
+
+import java.io.IOException;
 
 public class CommandRepoInfo implements Command {
 

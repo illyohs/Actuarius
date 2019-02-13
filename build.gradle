@@ -55,12 +55,14 @@ shadowJar {
 
 repositories {
     mavenCentral()
-	maven {
-		url  "https://jitpack.io"
-	}
+    jcenter()
+	maven { url  "https://jitpack.io" }
+    maven { url 'https://repo.spring.io/milestone' }
 }
 
 dependencies {
+
+    implementation 'com.github.Discord4J.Discord4J:build:v3-SNAPSHOT'
     implementation 'com.discord4j.discord4j:discord4j-core:v3-SNAPSHOT'
     implementation 'org.kohsuke:github-api:1.93'
 	implementation 'com.auth0:java-jwt:3.3.0'

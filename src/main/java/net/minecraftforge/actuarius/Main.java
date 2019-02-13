@@ -1,94 +1,38 @@
 package net.minecraftforge.actuarius;
 
-import java.io.IOException;
-import java.security.Security;
-
+import com.electronwill.nightconfig.core.file.FileConfig;
+import net.minecraftforge.actuarius.bot.BotManager;
+import net.minecraftforge.actuarius.bot.discord.commands.CommandTree;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
-import com.electronwill.nightconfig.core.file.FileConfig;
-
-import discord4j.core.ClientBuilder;
-import discord4j.core.DiscordClient;
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.util.Snowflake;
-import net.minecraftforge.actuarius.commands.Command;
-import net.minecraftforge.actuarius.commands.CommandException;
-import net.minecraftforge.actuarius.commands.CommandLabel;
-import net.minecraftforge.actuarius.commands.CommandRepoInfo;
-import net.minecraftforge.actuarius.commands.CommandTree;
-import net.minecraftforge.actuarius.commands.Context;
-import reactor.core.publisher.Hooks;
-import reactor.core.publisher.Mono;
+import java.io.IOException;
+import java.security.Security;
 
 public class Main extends CommandTree {
     
     @SuppressWarnings("null")
     public static final FileConfig config = FileConfig.builder("actuarius.toml").defaultResource("/default_config.toml").autosave().build();
 
-    public static void main(String[] unused) throws IOException {
+    public static BotManager bot;
+
+    public static void main(String[] unused) throws IOException
+    {
         Security.addProvider(new BouncyCastleProvider());
 
         config.load();
-        
-        String token = config.get("discord.token");
-       
-        if (token == null) {
-            throw new IllegalArgumentException("No token provided.");
-        }
-        
-        Hooks.onOperatorDebug();
-        
-        DiscordClient client = new ClientBuilder(token).build();
-        
-        CommandTree rootCommand = new Main();
-        rootCommand
-            .withNode("help", (ctx) -> {
-                String reply;
-                if (ctx.getArgs().length == 0) {    
-                    reply = "Available commands: " + rootCommand.getSubCommands();
-                } else {
-                    String cmdName = ctx.getArgs()[0];
-                    Command cmd = rootCommand.getSubcommand(cmdName);
-                    if (cmd == null) {
-                        throw new CommandException("No such command.");
-                    }
-                    reply = "**" + cmdName + " -- " + cmd.description() + "**\nUsage: " + cmdName + " " + cmd.usage();
-                }
-                
-                return ctx.getChannel().flatMap(c -> c.createMessage(spec -> spec.setContent(reply)));
-            })
-            .withNode("info", new CommandRepoInfo())
-            .withNode("label", new CommandLabel());
-        
-        client.getEventDispatcher().on(MessageCreateEvent.class)
-                
-            // Find all messages mentioning us
-            .filterWhen(e -> e.getMessage().getUserMentions().next().map(u -> client.getSelfId().map(u.getId()::equals).orElse(false)))
-            
-            // Filter for messages where the mention is the start of the content
-            .filterWhen(e -> Mono.justOrEmpty(client.getSelfId()).flatMap(id -> isMentionFirst(id, e.getMessage())))
-            .filter(e -> e.getMessage().getContent().isPresent())
-            .filter(e -> e.getGuildId().isPresent())
-            .map(Context::new)
-            .flatMap(ctx -> {
-                try {
-                    return rootCommand.invoke(ctx);
-                } catch (Exception e1) {
-                    // Generic error handling, can be improved
-                    return ctx.getChannel().map(c -> c.createMessage(spec -> spec.setContent(e1.getMessage())));
-                }
-            })
-            .subscribe();
 
-        // block() is required to prevent the VM exiting prematurely
-        client.login().block();
+        bot = new BotManager();
+
+        bot.startBots();
     }
-    
-    private static Mono<Boolean> isMentionFirst(Snowflake id, Message message) {
-        return Mono.just(message)
-                .filterWhen(m -> m.getUserMentions()
-                                    .map(u -> u.getId().equals(id)))
-                .map(m -> m.getContent().map(s -> s.matches("^<!?@" + id.asLong() + ">.*$")).orElse(false));
-    }
+
+
+//        String token = config.get("discord.token");
+//
+//        if (token == null) {
+//            throw new IllegalArgumentException("No token provided.");
+//        }
+//
+//        Hooks.onOperatorDebug();
+        
 }

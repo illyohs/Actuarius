@@ -1,12 +1,8 @@
-package net.minecraftforge.actuarius.commands;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+package net.minecraftforge.actuarius.bot.discord.commands;
 
 import reactor.core.publisher.Mono;
+
+import java.util.*;
 
 public class CommandTree implements Command {
     

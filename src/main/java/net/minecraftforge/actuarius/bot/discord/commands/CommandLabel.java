@@ -1,15 +1,14 @@
-package net.minecraftforge.actuarius.commands;
-
-import java.io.IOException;
-import java.util.Optional;
-
-import org.kohsuke.github.GHRepository;
+package net.minecraftforge.actuarius.bot.discord.commands;
 
 import net.minecraftforge.actuarius.util.GHInstallation;
 import net.minecraftforge.actuarius.util.GHInstallation.NoSuchInstallationException;
 import net.minecraftforge.actuarius.util.GithubUtil;
 import net.minecraftforge.actuarius.util.PermissionUtil;
+import org.kohsuke.github.GHRepository;
 import reactor.core.publisher.Mono;
+
+import java.io.IOException;
+import java.util.Optional;
 
 public class CommandLabel implements Command {
 

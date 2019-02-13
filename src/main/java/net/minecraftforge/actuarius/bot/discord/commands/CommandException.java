@@ -1,4 +1,4 @@
-package net.minecraftforge.actuarius.commands;
+package net.minecraftforge.actuarius.bot.discord.commands;
 
 
 public class CommandException extends Exception {

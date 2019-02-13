@@ -1,6 +1,4 @@
-package net.minecraftforge.actuarius.commands;
-
-import java.util.Optional;
+package net.minecraftforge.actuarius.bot.discord.commands;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Guild;
@@ -9,6 +7,8 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
+
+import java.util.Optional;
 
 public class Context {
     
